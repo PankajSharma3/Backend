@@ -1,6 +1,27 @@
 import User from '../model/userModel.js';
 import generateToken from '../lib/utils/generateToken.js';
 
+export const signup = async (req, res) => {
+    try {
+        const { username, password, role } = req.body;
+        if (!username || !password || !role) {
+            return res.status(400).json({ error: "All fields are required" });
+        }
+        const existingUser = await User.findOne({ username: username, role: role });
+        if (existingUser) {
+            return res.status(400).json({ error: "User already exists" });
+        }
+        const newUser = new User({ username, password, role });
+        await newUser.save();
+        generateToken(newUser._id, res);
+        return res.status(201).json({ message: "User created successfully", userId: newUser._id, username: newUser.username, role: newUser.role });
+    }
+    catch (error) {
+        console.error("Signup error:", error.message);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+}
+
 export const login = async (req, res) => {
     try {
         const { username, password, role } = req.body;
