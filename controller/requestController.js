@@ -44,12 +44,14 @@ export const updateRequestStatus = async (req, res) => {
             const previousStoreCount = storeItem.itemCount;
             storeItem.itemCount -= quantity;
 
-            // Add history entry for store (removal)
+            // Add history entry for store (sent to block)
             storeInventory.itemHistory.push({
                 itemName: itemName,
                 action: 'sent',
                 quantity: storeItem.itemCount,
                 previousQuantity: previousStoreCount,
+                fromRole: 'storeManager',
+                toRole: blockRole,
                 date: new Date()
             });
 
@@ -74,12 +76,14 @@ export const updateRequestStatus = async (req, res) => {
                 const previousBlockCount = blockItem.itemCount;
                 blockItem.itemCount += quantity;
 
-                // Add history entry for block (update)
+                // Add history entry for block (received update)
                 blockInventory.itemHistory.push({
                     itemName: itemName,
                     action: 'updated',
                     quantity: blockItem.itemCount,
                     previousQuantity: previousBlockCount,
+                    fromRole: 'storeManager',
+                    toRole: blockRole,
                     date: new Date()
                 });
             } else {
@@ -89,12 +93,14 @@ export const updateRequestStatus = async (req, res) => {
                     itemCount: quantity
                 });
 
-                // Add history entry for block (addition)
+                // Add history entry for block (received addition)
                 blockInventory.itemHistory.push({
                     itemName: itemName,
                     action: 'added',
                     quantity: quantity,
                     previousQuantity: 0,
+                    fromRole: 'storeManager',
+                    toRole: blockRole,
                     date: new Date()
                 });
             }

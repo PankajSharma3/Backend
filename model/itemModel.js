@@ -26,8 +26,16 @@ const itemSchema = new mongoose.Schema({
         },
         action: {
             type: String,
-            enum: ['added', 'updated', 'sent'],
+            enum: ['added', 'updated', 'sent', 'returned'],
             required: true
+        },
+        fromRole: {
+            type: String,
+            default: null
+        },
+        toRole: {
+            type: String,
+            default: null
         },
         quantity: Number,
         previousQuantity: Number,

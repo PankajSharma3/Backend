@@ -47,10 +47,10 @@ export const addIssue = async (req, res) => {
         const previousCount = item.itemCount;
         inventory.items[itemIndex].itemCount -= quantity;
 
-        // Add history entry
+        // Add history entry with appropriate action based on issue type
         const historyEntry = {
             itemName: issueTitle,
-            action: "updated",
+            action: issueType === 'Returned' ? 'returned' : 'updated',
             quantity: inventory.items[itemIndex].itemCount,
             previousQuantity: previousCount,
             date: new Date()
@@ -70,6 +70,38 @@ export const addIssue = async (req, res) => {
         });
     } catch (error) {
         console.error("Add issue error:", error.message);
+        res.status(500).json({ error: "Internal server error" });
+    }
+}
+
+export const updateIssue = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { status, resolution } = req.body;
+
+        const issue = await Issue.findById(id);
+        if (!issue) {
+            return res.status(404).json({ error: "Issue not found" });
+        }
+
+        if (status) {
+            issue.status = status;
+        }
+        if (resolution) {
+            issue.resolution = resolution;
+        }
+        if (status === 'resolved') {
+            issue.resolvedDate = new Date();
+        }
+
+        await issue.save();
+
+        res.status(200).json({
+            message: "Issue updated successfully",
+            data: issue
+        });
+    } catch (error) {
+        console.error("Update issue error:", error.message);
         res.status(500).json({ error: "Internal server error" });
     }
 }
