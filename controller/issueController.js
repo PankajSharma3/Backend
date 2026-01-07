@@ -3,8 +3,9 @@ import Items from "../model/itemModel.js";
 
 export const getIssues = async (req, res) => {
     try {
-        const { role } = req.query;
-        const issues = await Issue.find({ role: role });
+        const roleFromQuery = req.query.role || req.user?.username;
+        const filter = roleFromQuery ? { role: roleFromQuery } : {};
+        const issues = await Issue.find(filter).sort({ createdAt: -1 });
         res.status(200).json({ data: issues });
     } catch (error) {
         console.error("Get issues error:", error.message);
@@ -14,8 +15,10 @@ export const getIssues = async (req, res) => {
 
 export const addIssue = async (req, res) => {
     try {
-        const { role, issueTitle, issueType, quantity } = req.body;
-        if (!role || !issueTitle || !issueType || quantity === undefined) {
+        const { role, issueTitle, issueType, quantity, description } = req.body;
+        const targetRole = role || req.user?.username;
+
+        if (!targetRole || !issueTitle || !issueType || quantity === undefined) {
             return res.status(400).json({ error: "Role, issueTitle, issueType, and quantity are required" });
         }
         if (quantity < 1) {
@@ -23,7 +26,7 @@ export const addIssue = async (req, res) => {
         }
 
         // Find the inventory for this block/store
-        const inventory = await Items.findOne({ role: role });
+        const inventory = await Items.findOne({ role: targetRole });
         if (!inventory) {
             return res.status(404).json({ error: "Inventory not found for this role" });
         }
@@ -61,7 +64,15 @@ export const addIssue = async (req, res) => {
         await inventory.save();
 
         // Create the issue
-        const newIssue = new Issue({ role, issueTitle, issueType, quantity });
+        const newIssue = new Issue({
+            role: targetRole,
+            issueTitle,
+            issueType,
+            quantity,
+            title: issueTitle, // align with schema requirement
+            description: description || "",
+            reportedBy: req.user?.username || "Unknown"
+        });
         await newIssue.save();
 
         res.status(201).json({
