@@ -53,7 +53,7 @@ export const addIssue = async (req, res) => {
         // Add history entry with appropriate action based on issue type
         const historyEntry = {
             itemName: issueTitle,
-            action: issueType === 'Returned' ? 'returned' : 'updated',
+            action: issueType === 'Used' ? 'consumed' : 'updated',
             quantity: inventory.items[itemIndex].itemCount,
             previousQuantity: previousCount,
             date: new Date()
