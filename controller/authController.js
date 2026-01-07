@@ -13,8 +13,14 @@ export const signup = async (req, res) => {
         }
         const newUser = new User({ username, password, role });
         await newUser.save();
-        generateToken(newUser._id, res);
-        return res.status(201).json({ message: "User created successfully", userId: newUser._id, username: newUser.username, role: newUser.role });
+        const token = await generateToken(newUser._id, res);
+        return res.status(201).json({
+            message: "User created successfully",
+            userId: newUser._id,
+            username: newUser.username,
+            role: newUser.role,
+            token: token // Include token for mobile apps
+        });
     }
     catch (error) {
         console.error("Signup error:", error.message);
@@ -35,8 +41,14 @@ export const login = async (req, res) => {
         if (password != user.password) {
             return res.status(400).json({ error: "Incorrect password" });
         }
-        generateToken(user._id, res);
-        return res.status(200).json({ message: "Login successful", userId: user._id, username: user.username, role: user.role });
+        const token = await generateToken(user._id, res);
+        return res.status(200).json({
+            message: "Login successful",
+            userId: user._id,
+            username: user.username,
+            role: user.role,
+            token: token // Include token for mobile apps
+        });
     }
     catch (error) {
         console.error("Login error:", error.message);
