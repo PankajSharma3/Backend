@@ -3,7 +3,7 @@ import generateToken from '../lib/utils/generateToken.js';
 
 export const signup = async (req, res) => {
     try {
-        const { username, password, role } = req.body;
+        const { username, password, role, displayName } = req.body;
         if (!username || !password || !role) {
             return res.status(400).json({ error: "All fields are required" });
         }
@@ -11,7 +11,7 @@ export const signup = async (req, res) => {
         if (existingUser) {
             return res.status(400).json({ error: "User already exists" });
         }
-        const newUser = new User({ username, password, role });
+        const newUser = new User({ username, password, role, displayName });
         await newUser.save();
         const token = await generateToken(newUser._id, res);
         return res.status(201).json({
@@ -19,6 +19,7 @@ export const signup = async (req, res) => {
             userId: newUser._id,
             username: newUser.username,
             role: newUser.role,
+            displayName: newUser.displayName,
             token: token // Include token for mobile apps
         });
     }
@@ -47,6 +48,7 @@ export const login = async (req, res) => {
             userId: user._id,
             username: user.username,
             role: user.role,
+            displayName: user.displayName,
             token: token // Include token for mobile apps
         });
     }

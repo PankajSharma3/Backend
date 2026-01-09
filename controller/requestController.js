@@ -124,8 +124,8 @@ export const updateRequestStatus = async (req, res) => {
 
 export const createRequest = async (req, res) => {
     try {
-        const { role, name, quantity, requestedDate, requestStatus } = req.body;
-        const newRequest = new Request({ role, name, quantity, requestedDate, requestStatus });
+        const { displayName, name, quantity, requestedDate, requestStatus } = req.body;
+        const newRequest = new Request({ role: displayName, name, quantity, requestedDate, requestStatus });
         await newRequest.save();
         res.status(201).json({ message: "Request created successfully", requestId: newRequest._id });
     } catch (error) {
