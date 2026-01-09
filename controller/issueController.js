@@ -50,6 +50,11 @@ export const addIssue = async (req, res) => {
         const previousCount = item.itemCount;
         inventory.items[itemIndex].itemCount -= quantity;
 
+        // Update inventory displayName if not present (for old documents)
+        if (!inventory.displayName && displayName) {
+            inventory.displayName = displayName;
+        }
+
         // Add history entry with appropriate action based on issue type
         const historyEntry = {
             itemName: issueTitle,
