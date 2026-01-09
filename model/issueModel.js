@@ -5,6 +5,10 @@ const issueSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    displayName: {
+        type: String,
+        required: true
+    },
     title: {
         type: String,
         required: true,

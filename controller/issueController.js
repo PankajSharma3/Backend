@@ -15,11 +15,11 @@ export const getIssues = async (req, res) => {
 
 export const addIssue = async (req, res) => {
     try {
-        const { role, issueTitle, issueType, quantity, description } = req.body;
+        const { role, displayName, issueTitle, issueType, quantity, description } = req.body;
         const targetRole = role || req.user?.username;
 
-        if (!targetRole || !issueTitle || !issueType || quantity === undefined) {
-            return res.status(400).json({ error: "Role, issueTitle, issueType, and quantity are required" });
+        if (!targetRole || !displayName || !issueTitle || !issueType || quantity === undefined) {
+            return res.status(400).json({ error: "Role, displayName, issueTitle, issueType, and quantity are required" });
         }
         if (quantity < 1) {
             return res.status(400).json({ error: "Quantity must be at least 1" });
@@ -66,12 +66,13 @@ export const addIssue = async (req, res) => {
         // Create the issue
         const newIssue = new Issue({
             role: targetRole,
+            displayName: displayName,
             issueTitle,
             issueType,
             quantity,
             title: issueTitle, // align with schema requirement
             description: description || "",
-            reportedBy: req.user?.displayName || "Unknown"
+            reportedBy: displayName || req.user?.displayName || "Unknown"
         });
         await newIssue.save();
 
