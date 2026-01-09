@@ -18,10 +18,10 @@ export const getItems = async (req, res) => {
 
 export const addItem = async (req, res) => {
     try {
-        const { role, itemName, itemCount } = req.body;
+        const { role, displayName, itemName, itemCount } = req.body;
 
-        if (!role || !itemName || itemCount === undefined) {
-            return res.status(400).json({ error: "Role, itemName, and itemCount are required" });
+        if (!role || !displayName || !itemName || itemCount === undefined) {
+            return res.status(400).json({ error: "Role, displayName, itemName, and itemCount are required" });
         }
 
         if (itemCount < 0) {
@@ -52,6 +52,7 @@ export const addItem = async (req, res) => {
             // Create new document for this role
             itemDoc = new Items({
                 role,
+                displayName,
                 items: [{ itemName, itemCount }],
                 itemHistory: [{
                     itemName,
@@ -75,10 +76,10 @@ export const addItem = async (req, res) => {
 
 export const updateItem = async (req, res) => {
     try {
-        const { role, itemName, itemCount } = req.body;
+        const { role, displayName, itemName, itemCount } = req.body;
 
-        if (!role || !itemName || itemCount === undefined) {
-            return res.status(400).json({ error: "Role, itemName, and itemCount are required" });
+        if (!role || !displayName || !itemName || itemCount === undefined) {
+            return res.status(400).json({ error: "Role, displayName, itemName, and itemCount are required" });
         }
 
         if (itemCount < 0) {
