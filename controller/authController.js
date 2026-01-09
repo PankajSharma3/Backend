@@ -8,8 +8,12 @@ export const signup = async (req, res) => {
             return res.status(400).json({ error: "All fields are required" });
         }
         const existingUser = await User.findOne({ username: username, role: role });
+        const existingDisplayName = await User.findOne({ displayName: displayName });
         if (existingUser) {
             return res.status(400).json({ error: "User already exists" });
+        }
+        if (existingDisplayName) {
+            return res.status(400).json({ error: "Display name already exists" });
         }
         const newUser = new User({ username, password, role, displayName });
         await newUser.save();

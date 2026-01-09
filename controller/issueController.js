@@ -71,7 +71,7 @@ export const addIssue = async (req, res) => {
             quantity,
             title: issueTitle, // align with schema requirement
             description: description || "",
-            reportedBy: req.user?.username || "Unknown"
+            reportedBy: req.user?.displayName || "Unknown"
         });
         await newIssue.save();
 
