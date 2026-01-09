@@ -23,7 +23,8 @@ export const updateRequestStatus = async (req, res) => {
         if (status === 'approved' && request.requestStatus !== 'approved') {
             const itemName = request.name;
             const quantity = request.quantity;
-            const blockRole = request.role; // e.g., block1, block2, etc.
+            const blockRole = request.role; // username/identifier (e.g., block1)
+            const blockDisplayName = request.displayName; // friendly name
 
             // 1. Deduct from store manager inventory
             const storeInventory = await Items.findOne({ role: 'storeManager' });
@@ -61,12 +62,16 @@ export const updateRequestStatus = async (req, res) => {
             let blockInventory = await Items.findOne({ role: blockRole });
 
             if (!blockInventory) {
-                // Create new inventory for this block if doesn't exist
+                // Create new inventory for this block if it doesn't exist
                 blockInventory = new Items({
                     role: blockRole,
+                    displayName: blockDisplayName || blockRole,
                     items: [],
                     itemHistory: []
                 });
+            } else if (!blockInventory.displayName && blockDisplayName) {
+                // Backfill displayName for legacy inventories
+                blockInventory.displayName = blockDisplayName;
             }
 
             const blockItem = blockInventory.items.find(item => item.itemName === itemName);
@@ -124,8 +129,24 @@ export const updateRequestStatus = async (req, res) => {
 
 export const createRequest = async (req, res) => {
     try {
-        const { displayName, name, quantity, requestedDate, requestStatus } = req.body;
-        const newRequest = new Request({ role: displayName, name, quantity, requestedDate, requestStatus });
+        const { role, displayName, name, quantity, requestedDate, requestStatus } = req.body;
+
+        // Allow deriving from authenticated user when not provided
+        const derivedRole = role || req.user?.username;
+        const derivedDisplay = displayName || req.user?.displayName;
+
+        if (!derivedRole || !derivedDisplay || !name || quantity === undefined) {
+            return res.status(400).json({ error: "role, displayName, name and quantity are required" });
+        }
+
+        const newRequest = new Request({
+            role: derivedRole,
+            displayName: derivedDisplay,
+            name,
+            quantity,
+            requestedDate,
+            requestStatus
+        });
         await newRequest.save();
         res.status(201).json({ message: "Request created successfully", requestId: newRequest._id });
     } catch (error) {
