@@ -12,7 +12,8 @@ export const getItems = async (req, res) => {
         res.status(200).json({ data });
     } catch (error) {
         console.error("Get items error:", error.message);
-        res.status(500).json({ error: "Internal server error" });
+        console.error("Error stack:", error.stack);
+        res.status(500).json({ error: "Internal server error", details: error.message });
     }
 }
 
@@ -20,7 +21,10 @@ export const addItem = async (req, res) => {
     try {
         const { role, displayName, itemName, itemCount } = req.body;
 
+        console.log('Adding item:', { role, displayName, itemName, itemCount });
+
         if (!role || !displayName || !itemName || itemCount === undefined) {
+            console.log('Missing required fields');
             return res.status(400).json({ error: "Role, displayName, itemName, and itemCount are required" });
         }
 
@@ -70,7 +74,8 @@ export const addItem = async (req, res) => {
         });
     } catch (error) {
         console.error("Add item error:", error.message);
-        res.status(500).json({ error: "Internal server error" });
+        console.error("Error stack:", error.stack);
+        res.status(500).json({ error: "Internal server error", details: error.message });
     }
 }
 
@@ -117,7 +122,8 @@ export const updateItem = async (req, res) => {
         });
     } catch (error) {
         console.error("Update item error:", error.message);
-        res.status(500).json({ error: "Internal server error" });
+        console.error("Error stack:", error.stack);
+        res.status(500).json({ error: "Internal server error", details: error.message });
     }
 }
 
@@ -143,6 +149,7 @@ export const getItemHistory = async (req, res) => {
         });
     } catch (error) {
         console.error("Get item history error:", error.message);
-        res.status(500).json({ error: "Internal server error" });
+        console.error("Error stack:", error.stack);
+        res.status(500).json({ error: "Internal server error", details: error.message });
     }
 }

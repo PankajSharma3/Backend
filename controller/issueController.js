@@ -9,7 +9,8 @@ export const getIssues = async (req, res) => {
         res.status(200).json({ data: issues });
     } catch (error) {
         console.error("Get issues error:", error.message);
-        res.status(500).json({ error: "Internal server error" });
+        console.error("Error stack:", error.stack);
+        res.status(500).json({ error: "Internal server error", details: error.message });
     }
 }
 
@@ -18,7 +19,10 @@ export const addIssue = async (req, res) => {
         const { role, displayName, issueTitle, issueType, quantity, description } = req.body;
         const targetRole = role || req.user?.username;
 
+        console.log('Adding issue:', { targetRole, displayName, issueTitle, issueType, quantity });
+
         if (!targetRole || !displayName || !issueTitle || !issueType || quantity === undefined) {
+            console.log('Missing required fields');
             return res.status(400).json({ error: "Role, displayName, issueTitle, issueType, and quantity are required" });
         }
         if (quantity < 1) {
@@ -58,7 +62,7 @@ export const addIssue = async (req, res) => {
         // Add history entry with appropriate action based on issue type
         const historyEntry = {
             itemName: issueTitle,
-            action: issueType === 'Used' ? 'consumed' : 'updated',
+            action: issueType === 'Returned' ? 'returned' : 'updated',
             quantity: inventory.items[itemIndex].itemCount,
             previousQuantity: previousCount,
             date: new Date()
@@ -87,7 +91,8 @@ export const addIssue = async (req, res) => {
         });
     } catch (error) {
         console.error("Add issue error:", error.message);
-        res.status(500).json({ error: "Internal server error" });
+        console.error("Error stack:", error.stack);
+        res.status(500).json({ error: "Internal server error", details: error.message });
     }
 }
 
@@ -119,6 +124,7 @@ export const updateIssue = async (req, res) => {
         });
     } catch (error) {
         console.error("Update issue error:", error.message);
-        res.status(500).json({ error: "Internal server error" });
+        console.error("Error stack:", error.stack);
+        res.status(500).json({ error: "Internal server error", details: error.message });
     }
 }
