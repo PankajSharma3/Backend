@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 const itemSchema = new mongoose.Schema({
-    role: {
+    username: {
         type: String,
         required: true
     },

@@ -2,10 +2,11 @@ import Items from '../model/itemModel.js'
 
 export const getItems = async (req, res) => {
     try {
-        const { role } = req.query;
+        const { role, username } = req.query;
+        const owner = username || role; // backward compatibility with existing clients
         let data;
-        if (role) {
-            data = await Items.findOne({ role });
+        if (owner) {
+            data = await Items.findOne({ username: owner });
         } else {
             data = await Items.find();
         }
@@ -19,13 +20,14 @@ export const getItems = async (req, res) => {
 
 export const addItem = async (req, res) => {
     try {
-        const { role, displayName, itemName, itemCount } = req.body;
+        const { role, username, displayName, itemName, itemCount } = req.body;
+        const owner = username || role; // accept role for older clients
 
-        console.log('Adding item:', { role, displayName, itemName, itemCount });
+        console.log('Adding item:', { owner, displayName, itemName, itemCount });
 
-        if (!role || !displayName || !itemName || itemCount === undefined) {
+        if (!owner || !displayName || !itemName || itemCount === undefined) {
             console.log('Missing required fields');
-            return res.status(400).json({ error: "Role, displayName, itemName, and itemCount are required" });
+            return res.status(400).json({ error: "username (or role), displayName, itemName, and itemCount are required" });
         }
 
         if (itemCount < 0) {
@@ -33,7 +35,7 @@ export const addItem = async (req, res) => {
         }
 
         // Find existing document for this role
-        let itemDoc = await Items.findOne({ role });
+        let itemDoc = await Items.findOne({ username: owner });
 
         if (itemDoc) {
             // Check if item already exists
@@ -55,7 +57,7 @@ export const addItem = async (req, res) => {
         } else {
             // Create new document for this role
             itemDoc = new Items({
-                role,
+                username: owner,
                 displayName,
                 items: [{ itemName, itemCount }],
                 itemHistory: [{
@@ -81,10 +83,11 @@ export const addItem = async (req, res) => {
 
 export const updateItem = async (req, res) => {
     try {
-        const { role, displayName, itemName, itemCount } = req.body;
+        const { role, username, displayName, itemName, itemCount } = req.body;
+        const owner = username || role;
 
-        if (!role || !displayName || !itemName || itemCount === undefined) {
-            return res.status(400).json({ error: "Role, displayName, itemName, and itemCount are required" });
+        if (!owner || !displayName || !itemName || itemCount === undefined) {
+            return res.status(400).json({ error: "username (or role), displayName, itemName, and itemCount are required" });
         }
 
         if (itemCount < 0) {
@@ -92,10 +95,10 @@ export const updateItem = async (req, res) => {
         }
 
         // Find document for this role
-        const itemDoc = await Items.findOne({ role });
+        const itemDoc = await Items.findOne({ username: owner });
 
         if (!itemDoc) {
-            return res.status(404).json({ error: "No items found for this role" });
+            return res.status(404).json({ error: "No items found for this username" });
         }
 
         // Find and update the specific item
@@ -129,16 +132,17 @@ export const updateItem = async (req, res) => {
 
 export const getItemHistory = async (req, res) => {
     try {
-        const { role } = req.query;
+        const { role, username } = req.query;
+        const owner = username || role;
 
-        if (!role) {
-            return res.status(400).json({ error: "Role is required" });
+        if (!owner) {
+            return res.status(400).json({ error: "username (or role) is required" });
         }
 
-        const itemDoc = await Items.findOne({ role });
+        const itemDoc = await Items.findOne({ username: owner });
 
         if (!itemDoc) {
-            return res.status(404).json({ error: "No items found for this role" });
+            return res.status(404).json({ error: "No items found for this username" });
         }
 
         // Return history sorted by date (newest first)

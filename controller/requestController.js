@@ -42,7 +42,7 @@ export const updateRequestStatus = async (req, res) => {
             console.log('Approving request:', { itemName, quantity, blockRole, blockDisplayName });
 
             // 1. Deduct from store manager inventory
-            const storeInventory = await Items.findOne({ role: 'storeManager' });
+            const storeInventory = await Items.findOne({ username: 'storeManager' });
             if (!storeInventory) {
                 console.log('Store inventory not found');
                 return res.status(404).json({ error: "Store inventory not found" });
@@ -85,7 +85,7 @@ export const updateRequestStatus = async (req, res) => {
             console.log('Store inventory saved successfully');
 
             // 2. Add to block manager inventory
-            let blockInventory = await Items.findOne({ role: blockRole });
+            let blockInventory = await Items.findOne({ username: blockRole });
 
             console.log('Block inventory:', blockInventory ? 'found' : 'not found');
 
@@ -93,7 +93,7 @@ export const updateRequestStatus = async (req, res) => {
                 // Create new inventory for this block if it doesn't exist
                 console.log('Creating new inventory for block:', blockRole);
                 blockInventory = new Items({
-                    role: blockRole,
+                    username: blockRole,
                     displayName: blockDisplayName || blockRole,
                     items: [],
                     itemHistory: []

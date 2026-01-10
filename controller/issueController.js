@@ -30,7 +30,7 @@ export const addIssue = async (req, res) => {
         }
 
         // Find the inventory for this block/store
-        const inventory = await Items.findOne({ role: targetRole });
+        const inventory = await Items.findOne({ username: targetRole });
         if (!inventory) {
             return res.status(404).json({ error: "Inventory not found for this role" });
         }
