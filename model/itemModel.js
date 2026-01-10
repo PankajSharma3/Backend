@@ -34,7 +34,7 @@ const itemSchema = new mongoose.Schema({
         },
         action: {
             type: String,
-            enum: ['added', 'updated', 'sent', 'returned', 'consumed'],
+            enum: ['added', 'updated', 'sent', 'returned', 'consumed', 'damaged', 'expired'],
             required: true
         },
         fromRole: {
@@ -47,11 +47,27 @@ const itemSchema = new mongoose.Schema({
         },
         quantity: Number,
         previousQuantity: Number,
+        description: {
+            type: String,
+            default: ''
+        },
+        status: {
+            type: String,
+            enum: ['pending', 'resolved'],
+            default: 'pending'
+        },
+        resolution: {
+            type: String,
+            default: ''
+        },
+        resolvedDate: {
+            type: Date,
+            default: null
+        },
         date: {
             type: Date,
             default: Date.now
-        },
-        _id: false
+        }
     }]
 }, { timestamps: true });
 

@@ -1,5 +1,5 @@
 import express from "express";
-import { getIssues, addIssue, updateIssue } from "../controller/issueController.js";
+import { getIssues, addIssue, updateIssue, deleteIssue } from "../controller/issueController.js";
 import { protectRoute } from "../middleware/protectRoutes.js";
 
 const router = express.Router();
@@ -7,5 +7,6 @@ const router = express.Router();
 router.get('/', getIssues);
 router.post('/add', protectRoute, addIssue);
 router.put('/:id', protectRoute, updateIssue);
+router.delete('/:id', protectRoute, deleteIssue);
 
 export default router;
