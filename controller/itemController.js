@@ -3,13 +3,19 @@ import Items from '../model/itemModel.js'
 export const getItems = async (req, res) => {
     try {
         const { role, username } = req.query;
-        const owner = username || role; // backward compatibility with existing clients
         let data;
-        if (owner) {
-            data = await Items.findOne({ username: owner });
+
+        if (username) {
+            // Search by username directly
+            data = await Items.findOne({ username: username });
+        } else if (role) {
+            // Search by role field (e.g., role=storeManager finds the store manager's inventory)
+            data = await Items.findOne({ role: role });
         } else {
+            // Return all items if no filter
             data = await Items.find();
         }
+
         res.status(200).json({ data });
     } catch (error) {
         console.error("Get items error:", error.message);
