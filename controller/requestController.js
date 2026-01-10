@@ -15,9 +15,9 @@ export const updateRequestStatus = async (req, res) => {
     try {
         const { status } = req.body;
         const requestId = req.params.id;
-        
+
         console.log('Updating request status:', { requestId, status });
-        
+
         const request = await Request.findById(requestId);
         if (!request) {
             console.log('Request not found:', requestId);
