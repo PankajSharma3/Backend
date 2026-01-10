@@ -5,6 +5,10 @@ const itemSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    role: {
+        type: String,
+        required: true
+    },
     displayName: {
         type: String,
         required: true

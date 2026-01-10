@@ -58,6 +58,7 @@ export const addItem = async (req, res) => {
             // Create new document for this role
             itemDoc = new Items({
                 username: owner,
+                role: owner,
                 displayName,
                 items: [{ itemName, itemCount }],
                 itemHistory: [{

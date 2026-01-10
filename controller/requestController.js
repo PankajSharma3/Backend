@@ -94,6 +94,7 @@ export const updateRequestStatus = async (req, res) => {
                 console.log('Creating new inventory for block:', blockRole);
                 blockInventory = new Items({
                     username: blockRole,
+                    role: blockRole,
                     displayName: blockDisplayName || blockRole,
                     items: [],
                     itemHistory: []
