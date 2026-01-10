@@ -6,10 +6,8 @@ const ISSUE_ACTIONS = ['damaged', 'expired', 'returned'];
 export const getIssues = async (req, res) => {
     try {
         const roleFromQuery = req.query.role || req.user?.username;
-        
         // Find inventory document for this role
         const inventory = await Items.findOne({ username: roleFromQuery });
-        
         if (!inventory) {
             return res.status(200).json({ data: [] });
         }
