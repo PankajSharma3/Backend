@@ -62,7 +62,7 @@ export const addIssue = async (req, res) => {
         // Add history entry with appropriate action based on issue type
         const historyEntry = {
             itemName: issueTitle,
-            action: issueType === 'Returned' ? 'returned' : 'updated',
+            action: issueType.toLowerCase(), // Use actual issue type: damaged, expired, returned
             quantity: inventory.items[itemIndex].itemCount,
             previousQuantity: previousCount,
             date: new Date()
