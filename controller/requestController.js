@@ -42,7 +42,8 @@ export const updateRequestStatus = async (req, res) => {
             console.log('Approving request:', { itemName, quantity, blockRole, blockDisplayName });
 
             // 1. Deduct from store manager inventory
-            const storeInventory = await Items.findOne({ username: 'storeManager' });
+            // Search by role to find the store manager's inventory
+            const storeInventory = await Items.findOne({ role: 'storeManager' });
             if (!storeInventory) {
                 console.log('Store inventory not found');
                 return res.status(404).json({ error: "Store inventory not found" });
