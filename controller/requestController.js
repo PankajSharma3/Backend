@@ -78,7 +78,7 @@ export const updateRequestStatus = async (req, res) => {
                 quantity: storeItem.itemCount,
                 previousQuantity: previousStoreCount,
                 fromRole: 'storeManager',
-                toRole: blockRole,
+                toRole: blockDisplayName,
                 date: new Date()
             });
 
@@ -123,7 +123,7 @@ export const updateRequestStatus = async (req, res) => {
                     quantity: blockItem.itemCount,
                     previousQuantity: previousBlockCount,
                     fromRole: 'storeManager',
-                    toRole: blockRole,
+                    toRole: blockDisplayName,
                     date: new Date()
                 });
             } else {
@@ -141,7 +141,7 @@ export const updateRequestStatus = async (req, res) => {
                     quantity: quantity,
                     previousQuantity: 0,
                     fromRole: 'storeManager',
-                    toRole: blockRole,
+                    toRole: blockDisplayName,
                     date: new Date()
                 });
             }
