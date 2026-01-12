@@ -1,4 +1,6 @@
+
 import Items from '../model/itemModel.js'
+import User from '../model/userModel.js'
 
 export const getItems = async (req, res) => {
     try {
@@ -8,12 +10,34 @@ export const getItems = async (req, res) => {
         if (username) {
             // Search by username directly
             data = await Items.findOne({ username: username });
+            // Patch displayName if missing
+            if (data && !data.displayName) {
+                const user = await User.findOne({ username: data.username });
+                if (user && user.displayName) {
+                    data.displayName = user.displayName;
+                }
+            }
         } else if (role) {
             // Search by role field (e.g., role=storeManager finds the store manager's inventory)
             data = await Items.findOne({ role: role });
+            if (data && !data.displayName) {
+                const user = await User.findOne({ username: data.username });
+                if (user && user.displayName) {
+                    data.displayName = user.displayName;
+                }
+            }
         } else {
             // Return all items if no filter
             data = await Items.find();
+            // Patch displayName for all
+            for (let doc of data) {
+                if (!doc.displayName) {
+                    const user = await User.findOne({ username: doc.username });
+                    if (user && user.displayName) {
+                        doc.displayName = user.displayName;
+                    }
+                }
+            }
         }
 
         res.status(200).json({ data });
