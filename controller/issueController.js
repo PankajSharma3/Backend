@@ -6,6 +6,40 @@ const ISSUE_ACTIONS = ['damaged', 'expired', 'returned'];
 export const getIssues = async (req, res) => {
     try {
         const roleFromQuery = req.query.role || req.user?.username;
+
+        // If no role specified, fetch ALL issues from ALL inventories (for admin)
+        if (!roleFromQuery) {
+            const allInventories = await Items.find({});
+            const allIssues = [];
+
+            for (const inventory of allInventories) {
+                if (inventory.itemHistory && inventory.itemHistory.length > 0) {
+                    const issues = inventory.itemHistory
+                        .filter(entry => ISSUE_ACTIONS.includes(entry.action))
+                        .map(entry => ({
+                            _id: entry._id,
+                            role: inventory.username,
+                            displayName: inventory.displayName,
+                            issueTitle: entry.itemName,
+                            issueType: entry.action.charAt(0).toUpperCase() + entry.action.slice(1),
+                            quantity: entry.previousQuantity - entry.quantity,
+                            description: entry.description || '',
+                            status: entry.status || 'pending',
+                            resolution: entry.resolution || '',
+                            resolvedDate: entry.resolvedDate,
+                            createdAt: entry.date,
+                            date: entry.date
+                        }));
+                    allIssues.push(...issues);
+                }
+            }
+
+            // Sort all issues by date (newest first)
+            allIssues.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            return res.status(200).json({ data: allIssues });
+        }
+
         // Find inventory document for this role
         const inventory = await Items.findOne({ username: roleFromQuery });
         if (!inventory) {
