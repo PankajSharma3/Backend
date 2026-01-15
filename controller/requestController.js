@@ -218,3 +218,89 @@ export const getApprovedRequests = async (req, res) => {
         res.status(500).json({ error: "Internal server error", details: error.message });
     }
 }
+
+export const confirmRequestReceipt = async (req, res) => {
+    try {
+        const { confirmationStatus } = req.body;
+        const requestId = req.params.id;
+
+        console.log('Confirming request receipt:', { requestId, confirmationStatus });
+
+        const request = await Request.findById(requestId);
+        if (!request) {
+            return res.status(404).json({ error: "Request not found" });
+        }
+
+        if (request.confirmationStatus === confirmationStatus) {
+            return res.status(400).json({ error: `Request is already ${confirmationStatus}` });
+        }
+
+        // Only allow changing from pending to final state to avoid complex double-counting logic for now
+        // or allow switching but handle the diff. 
+        // For safety, let's assume we only handle pending -> confirmed/not_received OR correction.
+
+        // CRITICAL: Handle "not_received" logic - REVERSE the inventory movement
+        if (confirmationStatus === 'not_received' && request.requestStatus === 'approved') {
+            console.log('Item reported as NOT RECEIVED. Reversing inventory transaction...');
+
+            const itemName = request.name;
+            const quantity = request.quantity;
+            const blockRole = request.role;
+            const blockDisplayName = request.displayName;
+
+            // 1. Give back to Store Manager
+            const storeInventory = await Items.findOne({ role: 'storeManager' });
+            if (storeInventory) {
+                const storeItem = storeInventory.items.find(item => item.itemName === itemName);
+                if (storeItem) {
+                    const prevStoreCount = storeItem.itemCount;
+                    storeItem.itemCount += quantity;
+
+                    storeInventory.itemHistory.push({
+                        itemName: itemName,
+                        action: 'returned_not_received',
+                        quantity: storeItem.itemCount,
+                        previousQuantity: prevStoreCount,
+                        fromRole: blockDisplayName,
+                        toRole: 'storeManager',
+                        date: new Date()
+                    });
+                    await storeInventory.save();
+                    console.log('Returned items to Store Manager:', { item: itemName, returned: quantity });
+                }
+            }
+
+            // 2. Remove from Block Manager (because we added it when we approved)
+            const blockInventory = await Items.findOne({ username: blockRole });
+            if (blockInventory) {
+                const blockItem = blockInventory.items.find(item => item.itemName === itemName);
+                if (blockItem) {
+                    const prevBlockCount = blockItem.itemCount;
+                    // Ensure we don't go negative if something weird happened, though we should trust the flow
+                    blockItem.itemCount = Math.max(0, blockItem.itemCount - quantity);
+
+                    blockInventory.itemHistory.push({
+                        itemName: itemName,
+                        action: 'removed_not_received',
+                        quantity: blockItem.itemCount,
+                        previousQuantity: prevBlockCount,
+                        fromRole: blockDisplayName,
+                        toRole: 'storeManager', // logically going back
+                        date: new Date()
+                    });
+                    await blockInventory.save();
+                    console.log('Removed items from Block Manager:', { item: itemName, removed: quantity });
+                }
+            }
+        }
+
+        request.confirmationStatus = confirmationStatus;
+        await request.save();
+
+        console.log('Request confirmation updated:', { requestId, confirmationStatus });
+        res.status(200).json({ message: "Request confirmation status updated", data: request });
+    } catch (error) {
+        console.error('Error confirming request:', error);
+        res.status(500).json({ error: "Internal server error", details: error.message });
+    }
+}
