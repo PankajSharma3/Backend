@@ -27,7 +27,7 @@ export const createMaintenance = async (req, res) => {
 
         const newMaintenance = new Maintenance({
             title,
-            note: description,
+            description,
             priority: priority || 'medium',
             displayName,
             submittedBy,

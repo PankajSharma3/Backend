@@ -36,6 +36,10 @@ const maintenanceSchema = new mongoose.Schema({
     resolvedDate: {
         type: Date
     },
+    description: {
+        type: String,
+        required: true
+    },
     notes: {
         type: String // for store manager to add notes
     }
