@@ -34,7 +34,7 @@ const itemSchema = new mongoose.Schema({
         },
         action: {
             type: String,
-            enum: ['added', 'updated', 'sent', 'returned', 'consumed', 'damaged', 'expired'],
+            enum: ['added', 'updated', 'sent', 'returned', 'consumed', 'damaged', 'expired', 'returned_not_received', 'removed_not_received'],
             required: true
         },
         fromRole: {
