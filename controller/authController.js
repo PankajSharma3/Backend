@@ -1,5 +1,6 @@
 import User from '../model/userModel.js';
 import generateToken from '../lib/utils/generateToken.js';
+import Items from '../model/itemModel.js';
 
 export const signup = async (req, res) => {
     try {
@@ -79,6 +80,29 @@ export const getUserProfile = async (req, res) => {
     }
     catch (error) {
         console.error("Get profile error:", error.message);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+}
+
+export const deleteUser = async (req, res) => {
+    try {
+        const { username } = req.params;
+        if (!username) {
+            return res.status(400).json({ error: "Username is required" });
+        }
+
+        // Delete user
+        const deletedUser = await User.findOneAndDelete({ username });
+        if (!deletedUser) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        // Delete associated items/inventory
+        await Items.deleteMany({ username });
+
+        res.status(200).json({ message: "User and associated inventory deleted successfully" });
+    } catch (error) {
+        console.error("Delete user error:", error.message);
         res.status(500).json({ error: "Internal Server Error" });
     }
 }
