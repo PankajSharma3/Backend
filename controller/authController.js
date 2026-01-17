@@ -106,3 +106,13 @@ export const deleteUser = async (req, res) => {
         res.status(500).json({ error: "Internal Server Error" });
     }
 }
+
+export const getAllUsers = async (req, res) => {
+    try {
+        const users = await User.find().select("-password");
+        res.status(200).json({ data: users });
+    } catch (error) {
+        console.error("Get all users error:", error.message);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+}
