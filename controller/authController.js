@@ -18,14 +18,8 @@ export const signup = async (req, res) => {
         }
         const newUser = new User({ username, password, role, displayName });
         await newUser.save();
-        const token = await generateToken(newUser._id, res);
         return res.status(201).json({
-            message: "User created successfully",
-            userId: newUser._id,
-            username: newUser.username,
-            role: newUser.role,
-            displayName: newUser.displayName,
-            token: token // Include token for mobile apps
+            message: "User created successfully"
         });
     }
     catch (error) {
