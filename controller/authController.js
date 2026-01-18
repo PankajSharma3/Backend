@@ -30,11 +30,11 @@ export const signup = async (req, res) => {
 
 export const login = async (req, res) => {
     try {
-        const { username, password, role } = req.body;
-        if (!username || !password || !role) {
+        const { username, password } = req.body;
+        if (!username || !password ) {
             return res.status(400).json({ error: "All fields are required" });
         }
-        const user = await User.findOne({ username: username, role: role });
+        const user = await User.findOne({ username: username });
         if (!user) {
             return res.status(404).json({ error: "User not found" });
         }
