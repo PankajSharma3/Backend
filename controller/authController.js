@@ -31,7 +31,7 @@ export const signup = async (req, res) => {
 export const login = async (req, res) => {
     try {
         const { username, password } = req.body;
-        if (!username || !password ) {
+        if (!username || !password) {
             return res.status(400).json({ error: "All fields are required" });
         }
         const user = await User.findOne({ username: username });
@@ -107,6 +107,28 @@ export const getAllUsers = async (req, res) => {
         res.status(200).json({ data: users });
     } catch (error) {
         console.error("Get all users error:", error.message);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+}
+
+export const updatePassword = async (req, res) => {
+    try {
+        const { username, newPassword } = req.body;
+        if (!username || !newPassword) {
+            return res.status(400).json({ error: "Username and new password are required" });
+        }
+
+        const user = await User.findOne({ username });
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        user.password = newPassword;
+        await user.save();
+
+        res.status(200).json({ message: "Password updated successfully" });
+    } catch (error) {
+        console.error("Update password error:", error.message);
         res.status(500).json({ error: "Internal Server Error" });
     }
 }
