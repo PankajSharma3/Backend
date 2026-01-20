@@ -1,6 +1,7 @@
 import User from '../model/userModel.js';
 import generateToken from '../lib/utils/generateToken.js';
 import Items from '../model/itemModel.js';
+import bcrypt from 'bcryptjs';
 
 export const signup = async (req, res) => {
     try {
@@ -16,7 +17,10 @@ export const signup = async (req, res) => {
         if (existingDisplayName) {
             return res.status(400).json({ error: "Display name already exists" });
         }
-        const newUser = new User({ username, password, role, displayName });
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+
+        const newUser = new User({ username, password: hashedPassword, role, displayName });
         await newUser.save();
         return res.status(201).json({
             message: "User created successfully"
@@ -38,7 +42,8 @@ export const login = async (req, res) => {
         if (!user) {
             return res.status(404).json({ error: "User not found" });
         }
-        if (password != user.password) {
+        const isPasswordCorrect = await bcrypt.compare(password, user.password);
+        if (!isPasswordCorrect) {
             return res.status(400).json({ error: "Incorrect password" });
         }
         const token = await generateToken(user._id, res);
@@ -123,7 +128,10 @@ export const updatePassword = async (req, res) => {
             return res.status(404).json({ error: "User not found" });
         }
 
-        user.password = newPassword;
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+        user.password = hashedPassword;
         await user.save();
 
         res.status(200).json({ message: "Password updated successfully" });
